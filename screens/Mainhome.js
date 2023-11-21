@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView } from 'react-navigation';
+import BottomNavBar from './layout/BottomNavBar';
+
+
 const windowHeight = Dimensions.get('window').height;
 const topMargin = 50;
 const Mainhome = () => {
@@ -26,57 +30,80 @@ const Mainhome = () => {
   const buttonMargin = 30;
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.header, { height: headerHeight, }]}>
-        <View style={styles.buttonContainer}>
+    <>
+      {/* <BottomNavBar /> */}
+      <SafeAreaView style={styles.container}>
+        <View style={[styles.header, { height: headerHeight }]}>
           <Text style={[styles.userNameText, { top: topwuser, paddingRight: frameheader }]}>Tên Người Dùng</Text>
-          <TouchableOpacity style={[styles.button, styles.numberButton, { top: topwuser }]}>
-            <Text style={styles.buttonText}>2</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.notificationButton, { top: topwuser }]}>
-            <Text style={styles.buttonText}>Thông báo</Text>
-          </TouchableOpacity>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={[styles.button, styles.notificationButton, { top: topwuser }]}>
+              <Text style={styles.buttonText}>Thông báo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.button, styles.numberButton, { top: topwuser }]}>
+              <Text style={styles.buttonText}>🔔</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
 
-      <View style={[styles.whiteRectangle, { width: whiteRectangleWidth, top: topwhite, flexDirection: 'row', alignItems: 'center' }]}>
-        <Text style={styles.clockText}>Đồng hồ</Text>
-        <TouchableOpacity style={styles.buttonWeather}></TouchableOpacity>
-        <TouchableOpacity style={[styles.buttonWeather, { marginLeft: buttonMargin }]}></TouchableOpacity>
-        <TouchableOpacity style={[styles.buttonWeather, { marginLeft: buttonMargin }]}></TouchableOpacity>
-        <TouchableOpacity style={[styles.buttonWeather, { marginLeft: buttonMargin }]}></TouchableOpacity>
-        <TouchableOpacity style={[styles.buttonWeather, { marginLeft: buttonMargin }]}></TouchableOpacity>
-        <TouchableOpacity style={[styles.buttonWeather, { marginLeft: buttonMargin }]}></TouchableOpacity>
-        <Text style={styles.hourText}>
-          {currentTime.getHours().toString().padStart(2, '0')}:
-          {currentTime.getMinutes().toString().padStart(2, '0')}
-        </Text>
-        <Text style={styles.dateText}>
-          {currentTime.getDate().toString().padStart(2, '0')}/
-          {(currentTime.getMonth() + 1).toString().padStart(2, '0')}/
-          {currentTime.getFullYear()}
-        </Text>
-      </View>
-      <View style={styles.voiceAssistant}>
-        <Text style={styles.botInteractionMessage}>Bà cần giúp đỡ gì ạ</Text>
-      </View>
-    </View>
+        <View style={[styles.whiteRectangle, { width: whiteRectangleWidth, top: topwhite, flexDirection: 'row', alignItems: 'center' }]}>
+          <Text style={styles.clockText}>Đồng hồ</Text>
+          <TouchableOpacity style={styles.buttonWeather}></TouchableOpacity>
+          <TouchableOpacity style={[styles.buttonWeather, { marginLeft: buttonMargin }]}></TouchableOpacity>
+          <TouchableOpacity style={[styles.buttonWeather, { marginLeft: buttonMargin }]}></TouchableOpacity>
+          <TouchableOpacity style={[styles.buttonWeather, { marginLeft: buttonMargin }]}></TouchableOpacity>
+          <TouchableOpacity style={[styles.buttonWeather, { marginLeft: buttonMargin }]}></TouchableOpacity>
+          <TouchableOpacity style={[styles.buttonWeather, { marginLeft: buttonMargin }]}></TouchableOpacity>
+          <Text style={styles.hourText}>
+            {currentTime.getHours().toString().padStart(2, '0')}:
+            {currentTime.getMinutes().toString().padStart(2, '0')}
+          </Text>
+          <Text style={styles.dateText}>
+            {currentTime.getDate().toString().padStart(2, '0')}/
+            {(currentTime.getMonth() + 1).toString().padStart(2, '0')}/
+            {currentTime.getFullYear()}
+          </Text>
+        </View>
+        <View style={styles.voiceAssistant}>
+          <Text style={styles.botInteractionMessage}>Bà cần giúp đỡ gì ạ</Text>
+          <Image source={require('../assets/sound-waves.png')} style={styles.soundWaves} />
+        </View>
+      </SafeAreaView>
+    </>
   );
 };
 
 
 const styles = StyleSheet.create({
-  buttonContainer: {
-    flexDirection: 'row',
+  soundWaves: {
+    width: '55%',
+    height: '55%',
+    marginHorizontal: 'auto'
+  },
+  botInteractionMessage: {
+    textAlign: 'center',
+    fontSize: 30,
+    color: 'white',
+    fontWeight: 'bold'
+  },
+  voiceAssistant: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
     alignItems: 'center',
+    gap: 20,
+    width: '70%',
+    height: 299,
+    borderRadius: 10,
+    backgroundColor: '#235C25',
+    padding: 10
   },
   buttonWeather: {
     height: 80,
     width: 50,
     left: 120,
     marginRight: -20,
-    borderRadius: 3.125 * 16, // 3.125rem converted to pixels
-    overflow: 'hidden', // Make sure the gradient stays within the button boundaries
+    borderRadius: 3.125 * 16,
+    overflow: 'hidden',
   },
   buttonGradient: {
     flex: 1,
@@ -84,7 +111,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonContent: {
-    flex: 1, // Đảm bảo nội dung của nút được căn giữa
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -96,30 +123,27 @@ const styles = StyleSheet.create({
   },
   header: {
     position: 'absolute',
+    paddingTop: 15,
+    paddingHorizontal: 15,
     top: 0,
+    display: 'flex',
     width: '100%',
-    height: '10%', // 10% của chiều cao của màn hình
+    height: '10%',
     backgroundColor: '#235C25',
-    flexDirection: 'row-reverse',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    flexDirection: 'row',
     paddingRight: 16,
     paddingBottom: 16,
   },
   userNameText: {
     color: '#FFF',
     fontSize: 20,
-    left: 20,
     fontFamily: 'Roboto',
     fontWeight: '700',
-    marginRight: 90,
   },
   buttonContainer: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
+    flex: 1,
     flexDirection: 'row',
-    alignItems: 'center',
+    gap: 5
   },
 
   whiteRectangle: {
@@ -178,12 +202,10 @@ const styles = StyleSheet.create({
 
   button: {
     height: 38,
-    // Chiều rộng và chiều cao của nút
-    right: 50,
     padding: 5,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 19, // Nửa của chiều rộng hoặc chiều cao để tạo hình tròn
+    borderRadius: 19,
     backgroundColor: '#FFF',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -194,12 +216,12 @@ const styles = StyleSheet.create({
 
   notificationButton: {
     marginRight: 5,
+    paddingHorizontal: 15,
   },
 
   numberButton: {
-    left: 77,
 
-    width: 38, // Chiều rộng của nút "2"
+    width: 38,
   },
 
   buttonText: {
