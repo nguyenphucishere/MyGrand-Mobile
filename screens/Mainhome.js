@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-navigation';
-import BottomNavBar from './layout/BottomNavBar';
+import { Ionicons } from '@expo/vector-icons';
 
 
 const windowHeight = Dimensions.get('window').height;
 const topMargin = 50;
 const Mainhome = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [toggleVoice, setToggleVoice] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -28,6 +29,11 @@ const Mainhome = () => {
   const frameheader = windowHeight * 0.2;
   const topweather = -8
   const buttonMargin = 30;
+
+  const showVoiceChat = () => {
+    setToggleVoice(!toggleVoice);
+  }
+
 
   return (
     <>
@@ -63,17 +69,36 @@ const Mainhome = () => {
             {currentTime.getFullYear()}
           </Text>
         </View>
-        <View style={styles.voiceAssistant}>
+        {toggleVoice && <View style={styles.voiceAssistant}>
           <Text style={styles.botInteractionMessage}>Bà cần giúp đỡ gì ạ</Text>
           <Image source={require('../assets/sound-waves.png')} style={styles.soundWaves} />
-        </View>
+        </View>}
+        <Pressable
+          onPress={showVoiceChat}
+          style={styles.voiceBtn}
+        ><Ionicons name="mic" style={styles.voiceBtnText}></Ionicons></Pressable>
       </SafeAreaView>
     </>
   );
+
+
 };
 
 
 const styles = StyleSheet.create({
+  voiceBtnText: {
+    fontSize: 50,
+    color: 'white',
+    transform: [{ translateX: 1.5 }]
+  },
+  voiceBtn: {
+    padding: 25,
+    backgroundColor: '#235C25',
+    borderRadius: 999,
+    position: 'absolute',
+    bottom: 20,
+    zIndex: 999
+  },
   soundWaves: {
     width: '55%',
     height: '55%',
@@ -91,7 +116,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 20,
-    width: '70%',
+    width: '80%',
     height: 299,
     borderRadius: 10,
     backgroundColor: '#235C25',

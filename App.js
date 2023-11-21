@@ -1,45 +1,86 @@
 import React from 'react';
 import { StyleSheet, Text, View, Button } from 'react-native';
-import { createAppContainer } from 'react-navigation';
-import { createStackNavigator } from 'react-navigation-stack';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
 import Mainhome from './screens/Mainhome';
+
+const Tab = createBottomTabNavigator();
 
 class HomeScreen extends React.Component {
   render() {
-    const { navigate } = this.props.navigation;
+    //const { navigate } = this.props.navigation;
     return (
-      <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
-        <Button
-          title="Go to Main Home"
-          onPress={() => navigate('Mainhome')}
-        />
-      </View>
+      // <View style={styles.container}>
+      //   <Text>Open up App.js to start working on your app!</Text>
+      //   <Button
+      //     title="Go to Main Home"
+      //     onPress={() => navigate('Mainhome')}
+      //   />
+      // </View>
+      <NavigationContainer>
+        <Tab.Navigator
+
+
+          screenOptions={({ route }) => ({
+            headerShown: false,
+            tabBarIcon: ({ focused, color, size }) => {
+
+              let iconName;
+              if (route.name === 'Home') {
+
+                iconName = focused ? 'home' : 'home-outline';
+
+              } else if (route.name === 'Profile') {
+
+                iconName = focused ? 'person' : 'person-outline';
+
+              }
+              return <Ionicons name={iconName} size={size} color={color} />;
+
+            },
+
+          })}
+
+          tabBarOptions={{
+
+            activeTintColor: '#235C25',
+            inactiveTintColor: 'gray',
+
+          }}
+        >
+
+          <Tab.Screen name="Home" component={Mainhome} />
+
+          <Tab.Screen name="Profile" component={() => (<View></View>)} />
+        </Tab.Navigator>
+
+      </NavigationContainer>
     );
   }
 }
 
-const AppNavigator = createStackNavigator(
-  {
-    Home: {
-      screen: HomeScreen,
-      navigationOptions: {
-        headerShown: false, // Ẩn thanh tiêu đề cho màn hình Home
-      },
-    },
-    Mainhome: {
-      screen: Mainhome,
-      navigationOptions: {
-        headerShown: false, // Ẩn thanh tiêu đề cho màn hình Mainhome
-      },
-    },
-  },
-  {
-    initialRouteName: 'Home',
-  }
-);
+// const AppNavigator = createStackNavigator(
+//   {
+//     Home: {
+//       screen: HomeScreen,
+//       navigationOptions: {
+//         headerShown: false, // Ẩn thanh tiêu đề cho màn hình Home
+//       },
+//     },
+//     Mainhome: {
+//       screen: Mainhome,
+//       navigationOptions: {
+//         headerShown: false, // Ẩn thanh tiêu đề cho màn hình Mainhome
+//       },
+//     },
+//   },
+//   {
+//     initialRouteName: 'Home',
+//   }
+// );
 
-export default createAppContainer(AppNavigator);
+export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
