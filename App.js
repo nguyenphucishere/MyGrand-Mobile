@@ -5,9 +5,11 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import Mainhome from './screens/Mainhome';
 
+
 const Tab = createBottomTabNavigator();
 
 class HomeScreen extends React.Component {
+
   render() {
     //const { navigate } = this.props.navigation;
     return (
@@ -23,6 +25,14 @@ class HomeScreen extends React.Component {
 
 
           screenOptions={({ route }) => ({
+            tabBarActiveTintColor: "#235C25",
+            tabBarInactiveTintColor: "gray",
+            tabBarStyle: [
+              {
+                "display": "flex"
+              },
+              null
+            ],
             headerShown: false,
             tabBarIcon: ({ focused, color, size }) => {
 
@@ -41,18 +51,11 @@ class HomeScreen extends React.Component {
             },
 
           })}
-
-          tabBarOptions={{
-
-            activeTintColor: '#235C25',
-            inactiveTintColor: 'gray',
-
-          }}
         >
 
           <Tab.Screen name="Home" component={Mainhome} />
 
-          <Tab.Screen name="Profile" component={() => (<View></View>)} />
+          {/* <Tab.Screen name="Profile" component={() => (<View></View>)} /> */}
         </Tab.Navigator>
 
       </NavigationContainer>

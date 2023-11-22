@@ -3,15 +3,22 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image, Pressable 
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-navigation';
 import { Ionicons } from '@expo/vector-icons';
+import { PermissionsAndroid } from "react-native";
+import { Audio } from 'expo-av';
 
 
 const windowHeight = Dimensions.get('window').height;
 const topMargin = 50;
+let recording = new Audio.Recording();
+
+
+
 const Mainhome = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [toggleVoice, setToggleVoice] = useState(false);
 
   useEffect(() => {
+
     const interval = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
@@ -30,8 +37,42 @@ const Mainhome = () => {
   const topweather = -8
   const buttonMargin = 30;
 
+
+  async function startRecording() {
+    try {
+      console.log('Requesting permissions..');
+      await Audio.requestPermissionsAsync();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+      console.log('Starting recording..');
+      await recording.prepareToRecordAsync(
+        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+      );
+      await recording.startAsync();
+      console.log('Recording started');
+    } catch (err) {
+      console.error('Failed to start recording', err);
+    }
+  }
+
+  async function stopRecording() {
+    console.log('Stopping recording..');
+    await recording.stopAndUnloadAsync();
+    const uri = recording.getURI();
+    console.log('Recording stopped and stored at', uri);
+  }
+
   const showVoiceChat = () => {
     setToggleVoice(!toggleVoice);
+
+    if (toggleVoice == false) {
+      startRecording();
+    } else {
+      stopRecording();
+    }
+
   }
 
 
@@ -69,10 +110,13 @@ const Mainhome = () => {
             {currentTime.getFullYear()}
           </Text>
         </View>
-        {toggleVoice && <View style={styles.voiceAssistant}>
-          <Text style={styles.botInteractionMessage}>Bà cần giúp đỡ gì ạ</Text>
-          <Image source={require('../assets/sound-waves.png')} style={styles.soundWaves} />
-        </View>}
+        <View style={styles.voiceAssistant}>
+          {toggleVoice && <>
+            <Text style={styles.botInteractionMessage}>Bà cần giúp đỡ gì ạ</Text>
+            <Image source={require('../assets/sound-waves.png')} style={styles.soundWaves} />
+          </>
+          }
+        </View>
         <Pressable
           onPress={showVoiceChat}
           style={styles.voiceBtn}
