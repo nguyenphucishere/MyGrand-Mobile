@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image, Pressable, Linking, Button } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image, Pressable, Linking, Button, PermissionsAndroid } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-navigation';
 import { Ionicons } from '@expo/vector-icons';
-import { PermissionsAndroid } from "react-native";
+
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system'; // Thêm thư viện FileSystem
+
 
 const windowHeight = Dimensions.get('window').height;
 const topMargin = 50;
 let recording = new Audio.Recording();
 
-
 const Mainhome = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [toggleVoice, setToggleVoice] = useState(false);
+  const [showButtons, setShowButtons] = useState(true);
   const [text, setText] = useState("");
-
   useEffect(() => {
 
     const interval = setInterval(() => {
@@ -36,7 +36,6 @@ const Mainhome = () => {
   const frameheader = windowHeight * 0.2;
   const topweather = -8
   const buttonMargin = 30;
-
 
 
   async function uploadAudioToServer(uri) {
@@ -70,6 +69,7 @@ const Mainhome = () => {
 
 
   async function startRecording() {
+
     try {
       console.log('Requesting permissions..');
       await Audio.requestPermissionsAsync();
@@ -109,6 +109,18 @@ const Mainhome = () => {
       const data = await response.json();
       console.log(data);
 
+      if (data.error) return;
+      switch (data.object.toLowerCase()) {
+        case "youtube":
+          openYouTubeApp();
+          break;
+        case "thời tiết":
+          openWeatherApp();
+          break;
+        case "facebook":
+          openFacebookApp();
+          break;
+      }
 
     } catch (error) {
       console.error(error);
@@ -157,9 +169,20 @@ const Mainhome = () => {
         <Image source={require('../assets/sound-waves.png')} style={styles.soundWaves} />
       </View>
   }
+
   const openYouTubeApp = () => {
     Linking.openURL('https://www.youtube.com/');
   };
+
+  const openFacebookApp = () => {
+    Linking.openURL('https://fb.com/');
+  };
+
+  const openWeatherApp = () => {
+    Linking.openURL('https://www.msn.com/en-us/weather/forecast/');
+  };
+
+
   return (
     <>
       {/* <BottomNavBar /> */}
@@ -176,9 +199,57 @@ const Mainhome = () => {
           </View>
         </View>
 
-        <View>
-          <Button title="Mở YouTube" onPress={openYouTubeApp} />
-        </View>
+
+
+
+
+        {showButtons && (
+          <View style={styles.buttonRows}>
+            {/* Các nút ở đây */}
+
+
+
+
+
+
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity onPress={openYouTubeApp}>
+                <Image source={require('../assets/xemphim.png')} style={styles.img} />
+                <Text style={styles.buttonText_app}>Coi phim</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={openYouTubeApp}>
+                <Image source={require('../assets/game.png')} style={styles.img} />
+                <Text style={styles.buttonText_app}>Giải trí</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={openYouTubeApp}>
+                <Image source={require('../assets/goidien.png')} style={styles.img} />
+                <Text style={styles.buttonText_app}>Gọi điện</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.buttonRow}>
+              <TouchableOpacity onPress={openYouTubeApp}>
+                <Image source={require('../assets/nexflix.png')} style={styles.img} />
+                <Text style={styles.buttonText_app}>nexflix</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={openYouTubeApp}>
+                <Image source={require('../assets/control.png')} style={styles.img} />
+                <Text style={styles.buttonText_app}>Điều khiển</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={openYouTubeApp}>
+                <Image source={require('../assets/other.png')} style={styles.img} />
+                <Text style={styles.buttonText_app}>Khác</Text>
+              </TouchableOpacity>
+            </View>
+
+
+
+
+          </View>
+        )}
+
+
+
 
         <View style={[styles.whiteRectangle, { width: whiteRectangleWidth, top: topwhite, flexDirection: 'row', alignItems: 'center' }]}>
           <Text style={styles.clockText}>Đồng hồ</Text>
@@ -200,7 +271,7 @@ const Mainhome = () => {
         </View>
         {toggleVoice &&
           <View style={styles.voiceAssistant}>
-            <Text style={styles.botInteractionMessage}>{(text != "") ? text : "Bà cần giúp đỡ gì ạ"}</Text>
+            <Text style={styles.botInteractionMessage}>Bà cần giúp đỡ gì ạ</Text>
             <Image source={require('../assets/sound-waves.png')} style={styles.soundWaves} />
           </View>
         }
@@ -217,6 +288,26 @@ const Mainhome = () => {
 
 
 const styles = StyleSheet.create({
+
+
+
+  buttonRows: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    left: 50,
+    top: -0
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '80%',
+    marginBottom: 100, // Khoảng cách giữa hai hàng
+  },
+
+  img: {
+    height: 90,
+    width: 90,
+  },
   voiceBtnText: {
     fontSize: 50,
     color: 'white',
@@ -384,7 +475,16 @@ const styles = StyleSheet.create({
 
   buttonText: {
     color: '#000',
+    // Căn giữa theo chiều ngang
+    // Để tạo khoảng cách giữa hình ảnh và văn bản
+  },
 
+  buttonText_app: {
+    color: '#000',
+    fontSize: 28,
+    top: 0,
+    textAlign: 'center', // Căn giữa theo chiều ngang
+    // Để tạo khoảng cách giữa hình ảnh và văn bản
   },
 
 });
