@@ -11,6 +11,7 @@ import * as FileSystem from 'expo-file-system'; // Thêm thư viện FileSystem
 const windowHeight = Dimensions.get('window').height;
 const topMargin = 50;
 let recording = new Audio.Recording();
+const host = 'https://4178-2402-800-6314-57b-e832-9b68-ed81-6e64.ngrok-free.app';
 
 const Mainhome = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -39,7 +40,7 @@ const Mainhome = () => {
 
 
   async function uploadAudioToServer(uri) {
-    const apiUrl = 'https://4178-2402-800-6314-57b-e832-9b68-ed81-6e64.ngrok-free.app/get-text-from-voice';
+    const apiUrl = host + '/get-text-from-voice';
     try {
       const fileData = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 })
 
@@ -89,7 +90,7 @@ const Mainhome = () => {
   }
 
   async function getCommand(text) {
-    const apiUrl = 'https://4178-2402-800-6314-57b-e832-9b68-ed81-6e64.ngrok-free.app/get-command';
+    const apiUrl = host + '/get-command';
     try {
 
       const options = {
