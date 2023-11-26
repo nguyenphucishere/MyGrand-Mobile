@@ -12,36 +12,10 @@ const topMargin = 50;
 let recording = new Audio.Recording();
 
 
-
-async function uploadAudioToServer(uri) {
-  const apiUrl = 'https://f12e-2402-800-6314-57b-12c-b6be-f3a4-434f.ngrok-free.app/';
-  try {
-    const fileData = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 })
-
-    const options = {
-      method: 'POST',
-      body: JSON.stringify({
-        audio: fileData
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    };
-    const response = await fetch(apiUrl, options);
-    if (!response.ok) {
-      console.log(`Không thể tải lên audio. Máy chủ trả về mã trạng thái ${response.status}`);
-    }
-    const data = await response.json();
-    console.log('Tải lên thành công:', data);
-  } catch (error) {
-    console.error(error);
-  }
-
-}
-
 const Mainhome = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [toggleVoice, setToggleVoice] = useState(false);
+  const [text, setText] = useState("");
 
   useEffect(() => {
 
@@ -64,6 +38,37 @@ const Mainhome = () => {
   const buttonMargin = 30;
 
 
+
+  async function uploadAudioToServer(uri) {
+    const apiUrl = 'https://4178-2402-800-6314-57b-e832-9b68-ed81-6e64.ngrok-free.app/get-text-from-voice';
+    try {
+      const fileData = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 })
+
+      const options = {
+        method: 'POST',
+        body: JSON.stringify({
+          audio: fileData
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      };
+      const response = await fetch(apiUrl, options);
+      if (!response.ok) {
+        console.log(`Cannot upload: ${response.status}`);
+        return;
+      }
+      const data = await response.json();
+      setText(data.hypotheses[0].utterance)
+
+
+    } catch (error) {
+      console.error(error);
+    }
+
+  }
+
+
   async function startRecording() {
     try {
       console.log('Requesting permissions..');
@@ -83,11 +88,39 @@ const Mainhome = () => {
     }
   }
 
+  async function getCommand(text) {
+    const apiUrl = 'https://4178-2402-800-6314-57b-e832-9b68-ed81-6e64.ngrok-free.app/get-command';
+    try {
+
+      const options = {
+        method: 'POST',
+        body: JSON.stringify({
+          text
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      };
+      const response = await fetch(apiUrl, options);
+      if (!response.ok) {
+        console.log(`Cannot upload: ${response.status}`);
+        return;
+      }
+      const data = await response.json();
+      console.log(data);
+
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   async function stopRecording() {
     console.log('Stopping recording..');
     await recording.stopAndUnloadAsync();
     const uri = recording.getURI();
     await uploadAudioToServer(uri);
+    await getCommand(text);
 
     console.log('Recording stopped and stored at', uri);
 
@@ -167,7 +200,7 @@ const Mainhome = () => {
         </View>
         {toggleVoice &&
           <View style={styles.voiceAssistant}>
-            <Text style={styles.botInteractionMessage}>Bà cần giúp đỡ gì ạ</Text>
+            <Text style={styles.botInteractionMessage}>{(text != "") ? text : "Bà cần giúp đỡ gì ạ"}</Text>
             <Image source={require('../assets/sound-waves.png')} style={styles.soundWaves} />
           </View>
         }
