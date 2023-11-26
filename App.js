@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import Mainhome from './screens/Mainhome';
+import Profile from './screens/Profile';
 
 
 const Tab = createBottomTabNavigator();
@@ -55,7 +56,7 @@ class HomeScreen extends React.Component {
 
           <Tab.Screen name="Home" component={Mainhome} />
 
-          {/* <Tab.Screen name="Profile" component={() => (<View></View>)} /> */}
+          <Tab.Screen name="Profile" component={Profile} />
         </Tab.Navigator>
 
       </NavigationContainer>
