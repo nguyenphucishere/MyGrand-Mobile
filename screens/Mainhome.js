@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image, Pressable } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image, Pressable, Linking, Button } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-navigation';
 import { Ionicons } from '@expo/vector-icons';
 import { PermissionsAndroid } from "react-native";
 import { Audio } from 'expo-av';
-
+import * as FileSystem from 'expo-file-system'; // Thêm thư viện FileSystem
 
 const windowHeight = Dimensions.get('window').height;
 const topMargin = 50;
 let recording = new Audio.Recording();
 
 
-
 const Mainhome = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [toggleVoice, setToggleVoice] = useState(false);
+  const [text, setText] = useState("");
 
   useEffect(() => {
 
@@ -38,6 +38,37 @@ const Mainhome = () => {
   const buttonMargin = 30;
 
 
+
+  async function uploadAudioToServer(uri) {
+    const apiUrl = 'https://4178-2402-800-6314-57b-e832-9b68-ed81-6e64.ngrok-free.app/get-text-from-voice';
+    try {
+      const fileData = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 })
+
+      const options = {
+        method: 'POST',
+        body: JSON.stringify({
+          audio: fileData
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      };
+      const response = await fetch(apiUrl, options);
+      if (!response.ok) {
+        console.log(`Cannot upload: ${response.status}`);
+        return;
+      }
+      const data = await response.json();
+      setText(data.hypotheses[0].utterance)
+
+
+    } catch (error) {
+      console.error(error);
+    }
+
+  }
+
+
   async function startRecording() {
     try {
       console.log('Requesting permissions..');
@@ -48,7 +79,7 @@ const Mainhome = () => {
       });
       console.log('Starting recording..');
       await recording.prepareToRecordAsync(
-        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
       await recording.startAsync();
       console.log('Recording started');
@@ -57,25 +88,78 @@ const Mainhome = () => {
     }
   }
 
+  async function getCommand(text) {
+    const apiUrl = 'https://4178-2402-800-6314-57b-e832-9b68-ed81-6e64.ngrok-free.app/get-command';
+    try {
+
+      const options = {
+        method: 'POST',
+        body: JSON.stringify({
+          text
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      };
+      const response = await fetch(apiUrl, options);
+      if (!response.ok) {
+        console.log(`Cannot upload: ${response.status}`);
+        return;
+      }
+      const data = await response.json();
+      console.log(data);
+
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   async function stopRecording() {
     console.log('Stopping recording..');
     await recording.stopAndUnloadAsync();
     const uri = recording.getURI();
+    await uploadAudioToServer(uri);
+    await getCommand(text);
+
     console.log('Recording stopped and stored at', uri);
+
+    recording = new Audio.Recording();
   }
 
-  const showVoiceChat = () => {
-    setToggleVoice(!toggleVoice);
-
-    if (toggleVoice == false) {
-      startRecording();
+  const [isRecording, setIsRecording] = useState(false);
+  const showVoiceChat = async () => {
+    if (!toggleVoice) {
+      try {
+        await startRecording();
+        setToggleVoice(true);
+        setIsRecording(true);
+      } catch (err) {
+        console.error('Failed to start recording', err);
+      }
     } else {
-      stopRecording();
+      try {
+        await stopRecording();
+
+        setToggleVoice(false);
+        setIsRecording(false);
+      } catch (error) {
+        console.error('Failed to stop recording and upload audio:', error);
+      }
     }
+  };
 
+  // Khi không có ghi âm (isRecording là false) thì không hiển thị voice assistant
+  {
+    isRecording &&
+      <View style={styles.voiceAssistant}>
+        <Text style={styles.botInteractionMessage}>Bà cần giúp đỡ gì ạ</Text>
+        <Image source={require('../assets/sound-waves.png')} style={styles.soundWaves} />
+      </View>
   }
-
-
+  const openYouTubeApp = () => {
+    Linking.openURL('https://www.youtube.com/');
+  };
   return (
     <>
       {/* <BottomNavBar /> */}
@@ -90,6 +174,10 @@ const Mainhome = () => {
               <Text style={styles.buttonText}>🔔</Text>
             </TouchableOpacity>
           </View>
+        </View>
+
+        <View>
+          <Button title="Mở YouTube" onPress={openYouTubeApp} />
         </View>
 
         <View style={[styles.whiteRectangle, { width: whiteRectangleWidth, top: topwhite, flexDirection: 'row', alignItems: 'center' }]}>
@@ -110,13 +198,12 @@ const Mainhome = () => {
             {currentTime.getFullYear()}
           </Text>
         </View>
-        <View style={styles.voiceAssistant}>
-          {toggleVoice && <>
-            <Text style={styles.botInteractionMessage}>Bà cần giúp đỡ gì ạ</Text>
+        {toggleVoice &&
+          <View style={styles.voiceAssistant}>
+            <Text style={styles.botInteractionMessage}>{(text != "") ? text : "Bà cần giúp đỡ gì ạ"}</Text>
             <Image source={require('../assets/sound-waves.png')} style={styles.soundWaves} />
-          </>
-          }
-        </View>
+          </View>
+        }
         <Pressable
           onPress={showVoiceChat}
           style={styles.voiceBtn}
@@ -140,8 +227,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#235C25',
     borderRadius: 999,
     position: 'absolute',
-    bottom: 20,
-    zIndex: 999
+    bottom: 100,
+    right: 250,
+    zIndex: 2, // Đặt zIndex lớn hơn để nút micro hiển thị ở trên
   },
   soundWaves: {
     width: '55%',
@@ -233,7 +321,7 @@ const styles = StyleSheet.create({
   clockText: {
     color: '#2F2F2F',
     fontFamily: 'Roboto',
-    fontSize: 16,
+    fontSize: 20,
     fontStyle: 'normal',
     fontWeight: '400',
     lineHeight: 20,
@@ -256,9 +344,10 @@ const styles = StyleSheet.create({
   },
 
   dateText: {
+    top: 70,
     color: '#2F2F2F',
     fontFamily: 'Roboto',
-    fontSize: 12,
+    fontSize: 20,
     fontStyle: 'normal',
     fontWeight: '400',
     lineHeight: 20,
