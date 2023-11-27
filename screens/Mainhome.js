@@ -122,18 +122,22 @@ const Mainhome = () => {
     setToggleVoice(true);
     setQuestion(question);
     await startRecording();
-    const data = await stopRecording(true);
 
-    if (data.gpt.error) {
-      callbackError(data);
+    setTimeout(async function () {
+      const data = await stopRecording(true);
+
+      if (data.gpt.error) {
+        callbackError(data);
+        setToggleVoice(false);
+        setQuestion("");
+        return;
+      }
+
+      callback(data);
       setToggleVoice(false);
       setQuestion("");
-      return;
-    }
+    }, 3000);
 
-    callback(data);
-    setToggleVoice(false);
-    setQuestion("");
 
   }
 
