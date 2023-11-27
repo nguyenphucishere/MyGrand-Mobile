@@ -11,13 +11,12 @@ import * as FileSystem from 'expo-file-system'; // Thêm thư viện FileSystem
 const windowHeight = Dimensions.get('window').height;
 const topMargin = 50;
 let recording = new Audio.Recording();
-const host = 'https://mygrand-api.vercel.app/api/';
+const host = 'https://mygrand-api.vercel.app/api';
 
 const Mainhome = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [toggleVoice, setToggleVoice] = useState(false);
   const [showButtons, setShowButtons] = useState(true);
-  const [text, setText] = useState("");
   useEffect(() => {
 
     const interval = setInterval(() => {
@@ -59,7 +58,8 @@ const Mainhome = () => {
         return;
       }
       const data = await response.json();
-      setText(data.hypotheses[0].utterance)
+      return data.hypotheses[0].utterance;
+
 
 
     } catch (error) {
@@ -96,7 +96,7 @@ const Mainhome = () => {
       const options = {
         method: 'POST',
         body: JSON.stringify({
-          text
+          text: text
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -132,7 +132,7 @@ const Mainhome = () => {
     console.log('Stopping recording..');
     await recording.stopAndUnloadAsync();
     const uri = recording.getURI();
-    await uploadAudioToServer(uri);
+    const text = await uploadAudioToServer(uri);
     await getCommand(text);
 
     console.log('Recording stopped and stored at', uri);
