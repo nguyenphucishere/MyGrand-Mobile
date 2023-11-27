@@ -17,6 +17,7 @@ const Mainhome = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [toggleVoice, setToggleVoice] = useState(false);
   const [showButtons, setShowButtons] = useState(true);
+  const [showMicro, setShowMicro] = useState(true);
 
   const [question, setQuestion] = useState('');
 
@@ -121,21 +122,23 @@ const Mainhome = () => {
   async function askingForInformation(question, callback, callbackError) {
     setToggleVoice(true);
     setQuestion(question);
+    setShowMicro(false);
     await startRecording();
 
     setTimeout(async function () {
       const data = await stopRecording(true);
+      setShowMicro(true);
 
       if (data.gpt.error) {
-        callbackError(data);
         setToggleVoice(false);
         setQuestion("");
+        callbackError(data);
         return;
       }
 
-      callback(data);
       setToggleVoice(false);
       setQuestion("");
+      callback(data);
     }, 3000);
 
 
@@ -311,10 +314,13 @@ const Mainhome = () => {
             <Image source={require('../assets/sound-waves.png')} style={styles.soundWaves} />
           </View>
         }
-        <Pressable
-          onPress={showVoiceChat}
-          style={styles.voiceBtn}
-        ><Ionicons name="mic" style={styles.voiceBtnText}></Ionicons></Pressable>
+
+        {showMicro &&
+          <Pressable
+            onPress={showVoiceChat}
+            style={styles.voiceBtn}
+          ><Ionicons name="mic" style={styles.voiceBtnText}></Ionicons></Pressable>
+        }
       </SafeAreaView>
     </>
   );
