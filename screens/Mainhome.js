@@ -17,6 +17,9 @@ const Mainhome = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [toggleVoice, setToggleVoice] = useState(false);
   const [showButtons, setShowButtons] = useState(true);
+
+  const [question, setQuestion] = useState('');
+
   useEffect(() => {
 
     const interval = setInterval(() => {
@@ -90,6 +93,7 @@ const Mainhome = () => {
   }
 
   async function getCommand(text) {
+    console.log(text);
     const apiUrl = host + '/get-command';
     try {
 
@@ -104,13 +108,49 @@ const Mainhome = () => {
       };
       const response = await fetch(apiUrl, options);
       if (!response.ok) {
-        console.log(`Cannot upload: ${response.status}`);
-        return;
+        return { error: true };
       }
       const data = await response.json();
-      console.log(data);
+      return data;
 
-      if (data.error) return;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function askingForInformation(question, callback, callbackError) {
+    setToggleVoice(true);
+    setQuestion(question);
+    await startRecording();
+    const data = await stopRecording(true);
+
+    if (data.gpt.error) {
+      callbackError(data);
+      setToggleVoice(false);
+      setQuestion("");
+      return;
+    }
+
+    callback(data);
+    setToggleVoice(false);
+    setQuestion("");
+
+  }
+
+  async function stopRecording(returnData = false) {
+    console.log('Stopping recording..');
+    await recording.stopAndUnloadAsync();
+    const uri = recording.getURI();
+
+    const text = await uploadAudioToServer(uri);
+    const data = await getCommand(text);
+
+    if (returnData) {
+      recording = new Audio.Recording();
+      return { gpt: data, text };
+    }
+
+    if (!data.error) {
       switch (data.object.toLowerCase()) {
         case "youtube":
           openYouTubeApp();
@@ -121,19 +161,13 @@ const Mainhome = () => {
         case "facebook":
           openFacebookApp();
           break;
+        case "phim":
+          askingForInformation("Bà muốn xem phim gì ạ?", ({ gpt }) => {
+            openYouTubeApp(gpt.object)
+          }, ({ text }) => openYouTubeApp(text))
+          break;
       }
-
-    } catch (error) {
-      console.error(error);
     }
-  }
-
-  async function stopRecording() {
-    console.log('Stopping recording..');
-    await recording.stopAndUnloadAsync();
-    const uri = recording.getURI();
-    const text = await uploadAudioToServer(uri);
-    await getCommand(text);
 
     console.log('Recording stopped and stored at', uri);
 
@@ -171,7 +205,11 @@ const Mainhome = () => {
       </View>
   }
 
-  const openYouTubeApp = () => {
+  const openYouTubeApp = (searchQuery = '') => {
+    if (searchQuery.length > 0) {
+      Linking.openURL('https://www.youtube.com/results?search_query=' + searchQuery);
+      return
+    }
     Linking.openURL('https://www.youtube.com/');
   };
 
@@ -207,13 +245,6 @@ const Mainhome = () => {
         {showButtons && (
           <View style={styles.buttonRows}>
             {/* Các nút ở đây */}
-
-
-
-
-
-
-
             <View style={styles.buttonRow}>
               <TouchableOpacity onPress={openYouTubeApp}>
                 <Image source={require('../assets/xemphim.png')} style={styles.img} />
@@ -272,7 +303,7 @@ const Mainhome = () => {
         </View>
         {toggleVoice &&
           <View style={styles.voiceAssistant}>
-            <Text style={styles.botInteractionMessage}>Bà cần giúp đỡ gì ạ</Text>
+            <Text style={styles.botInteractionMessage}>{question != '' ? question : 'Bà cần giúp đỡ gì ạ'}</Text>
             <Image source={require('../assets/sound-waves.png')} style={styles.soundWaves} />
           </View>
         }
