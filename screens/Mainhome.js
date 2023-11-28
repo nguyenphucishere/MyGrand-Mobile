@@ -5,7 +5,8 @@ import { SafeAreaView } from 'react-navigation';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Audio } from 'expo-av';
-import * as FileSystem from 'expo-file-system'; // Thêm thư viện FileSystem
+import * as FileSystem from 'expo-file-system';
+import * as Speech from 'expo-speech';
 
 
 const windowHeight = Dimensions.get('window').height;
@@ -169,6 +170,7 @@ const Mainhome = () => {
           openFacebookApp();
           break;
         case "phim":
+          Speech.speak("Bà muốn xem phim gì ạ?")
           askingForInformation("Bà muốn xem phim gì ạ?", ({ gpt }) => {
             openYouTubeApp(gpt.object)
           }, ({ text }) => openYouTubeApp(text))
@@ -321,6 +323,11 @@ const Mainhome = () => {
             style={styles.voiceBtn}
           ><Ionicons name="mic" style={styles.voiceBtnText}></Ionicons></Pressable>
         }
+
+        <Pressable
+          onPress={() => { }}
+          style={styles.sosbtn}
+        ><Ionicons name="help-buoy-outline" style={styles.voiceBtnText}></Ionicons></Pressable>
       </SafeAreaView>
     </>
   );
@@ -330,7 +337,16 @@ const Mainhome = () => {
 
 
 const styles = StyleSheet.create({
-
+  sosbtn: {
+    position: "absolute",
+    bottom: -50,
+    right: 10,
+    width: 50,
+    height: 50,
+    borderRadius: 999,
+    padding: 25,
+    backgroundColor: 'red',
+  },
 
 
   buttonRows: {
