@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image, Pressable, BackHandler, Platform } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Image, Pressable, BackHandler, Platform } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 /**
  * All CSS properties which are defined in this file is taken from the design file on Figma.
@@ -72,6 +73,7 @@ const UserProfile = ({hoVaTen = "Họ và tên", email = "example@gmail.com", so
               </View>
             </View>
           </View>
+
           <View style={internalStyles.verifiedWrapper}>
             <Image style={{width: 12, height: 12}} resizeMode="cover" source={require('../assets/confirm-icon.png')} />
             <Text style={internalStyles.verifiedText}>Đã xác thực</Text>
@@ -87,7 +89,7 @@ const ExitBtn = () => {
   const styleWhenPress = ({pressed}) => {
     return [
       {backgroundColor: pressed ? "#f0f0f0" : null},
-      styles.frameFlexBox, styles.exitBtnWrapper
+      styles.exitBtnWrapper
     ]
   };
 
@@ -143,39 +145,103 @@ const UserOption = ({optionName, imgSource, onPress}) => {
   );
 };
 
-// Chứa tất cả options trong trang profile chính.
-const Options = () => {
-  return (
-  <View style={styles.frameParent}>
-    <View style={{width: windowWidth * 0.85, marginTop: 12}}>
-      <Text style={styles.sectionName}>Tài khoản & Bảo mật</Text>
-      <View style={{marginTop: 16}}>
-        <UserOption optionName="Cài đặt tài khoản" imgSource={require('../assets/profileSetting/account-setting.png')} />
-        <UserOption optionName="Thông tin cá nhân" imgSource={require('../assets/profileSetting/user-profile.png')} />
-        <UserOption optionName="Ví điện tử" imgSource={require('../assets/profileSetting/e-wallet.png')} />
-        <UserOption optionName="Phiếu giảm giá" imgSource={require('../assets/profileSetting/coupons.png')} />
-      </View>
-    </View>
-    <View style={{width: windowWidth * 0.85, marginTop: 24}}>
-      <Text style={styles.sectionName}>Chung</Text>
-      <View style={{marginTop: 16}}>
-        <UserOption optionName="Điều khoản & Điều kiện" imgSource={require('../assets/profileSetting/terms-and-conditions.png')} />
-        <UserOption optionName="Chính sách bảo mật" imgSource={require('../assets/profileSetting/privacy-policies.png')} />
-        <UserOption optionName="Chăm sóc khách hàng" imgSource={require('../assets/profileSetting/customer-care.png')} />
-      </View>
-    </View>
-
-    {/* Exit button is implemented to only appear and work on Android devices. */}
-    {Platform.OS === "android" ? <View style={{flexDirection: "column", width: windowWidth * 0.85}}><ExitBtn /></View> : <></>}
-  </View>);
-  };
-
 // Main profile screen.
 const Profile = () => {
+  const navigation = useNavigation();
+  const [isSettingOn, setSettingOn] = useState(false);
+  const [isInfromOn, setInfromOn] = useState(false);
+  const [isWalletOn, setWalletOn] = useState(false);
+  const [isCouponOn, setCouponOn] = useState(false);
+  const [isDieukhoangOn, setDieukhoangOn] = useState(false); // State cho nút Dieukhoang
+  const [isPrivacyPolicyOn, setPrivacyPolicyOn] = useState(false); // State cho nút PrivacyPolicy
+  const [isCskhOn, setCskhOn] = useState(false);
+
+  const handleSettingPress = () => setSettingOn(true);
+
+  const handleIfromPress = () => setInfromOn(true);
+
+  const handleWalletPress = () => setWalletOn(true);
+
+  const handleCouponPress = () => setCouponOn(true);
+
+  const handleDieukhoangPress = () => setDieukhoangOn(true);
+
+  const handlePrivacyPolicyPress = () => setPrivacyPolicyOn(true);
+
+  const handleCskhPress = () => setCskhOn(true);
+
+  useEffect(() => {
+    if (isSettingOn) {
+      setSettingOn(false);
+      navigation.navigate('Setting');
+    }
+    if (isInfromOn) {
+      setInfromOn(false);
+      navigation.navigate('Infrom');
+    }
+    if (isDieukhoangOn) {
+      setDieukhoangOn(false);
+      navigation.navigate('Dieukhoang'); // Chuyển hướng đến màn hình Dieukhoang
+    }
+
+    if (isPrivacyPolicyOn) {
+      setPrivacyPolicyOn(false);
+      navigation.navigate('PrivacyPolicy'); // Chuyển hướng đến màn hình PrivacyPolicy
+    }
+
+  }, [isInfromOn, isSettingOn, isWalletOn, isCouponOn,isDieukhoangOn, isPrivacyPolicyOn, isCskhOn,navigation]);
+
   return (
     <SafeAreaView style={{backgroundColor: "#fcf9f9", flex: 1}}>
+      {/* Phần header chứa thông tin người dùng */}
       <UserProfile />
-      <Options />
+
+      <View style={styles.frameParent}>
+        <View style={{width: windowWidth * 0.85, marginTop: 12}}>
+          <Text style={styles.sectionName}>Tài khoản & Bảo mật</Text>
+          <View style={{marginTop: 16}}>
+
+            <UserOption optionName="Cài đặt tài khoản" 
+            imgSource={require('../assets/profileSetting/setting_count_icon.png')} 
+            onPress={handleSettingPress} />
+
+            <UserOption optionName="Thông tin cá nhân" 
+            imgSource={require('../assets/profileSetting/inform_icon.png')} 
+            onPress={handleIfromPress} />
+
+            <UserOption optionName="Ví điện tử" 
+            imgSource={require('../assets/profileSetting/money.png')} 
+            onPress={handleWalletPress} />
+
+            <UserOption optionName="Phiếu giảm giá" 
+            imgSource={require('../assets/profileSetting/ticket.png')} 
+            onPress={handleCouponPress} />
+
+          </View>
+        </View>
+
+        <View style={{width: windowWidth * 0.85, marginTop: 24}}>
+          <Text style={styles.sectionName}>Chung</Text>
+          <View style={{marginTop: 16}}>
+
+            <UserOption optionName="Điều khoản & Điều kiện" 
+            imgSource={require('../assets/profileSetting/dieukhoang.png')} 
+            onPress={handleDieukhoangPress} />
+
+            <UserOption optionName="Chính sách bảo mật" 
+            imgSource={require('../assets/profileSetting/baomat.png')} 
+            onPress={handlePrivacyPolicyPress } />
+
+            <UserOption optionName="Chăm sóc khách hàng" 
+            imgSource={require('../assets/profileSetting/cskh.png')} 
+            onPress={handleCskhPress} />
+          </View>
+        </View>
+
+        {/* Exit button is implemented to only appear and work on Android devices. */}
+        {Platform.OS === "android" ? <View style={{flexDirection: "column", width: windowWidth * 0.85}}><ExitBtn /></View> : <></>}
+      </View>
+
     </SafeAreaView>
   );
 }
@@ -189,19 +255,8 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     fontSize: 20
   },
-  frameFlexBox: {
-    paddingVertical: 12,
-    paddingHorizontal: 0,
-    justifyContent: "space-between",
-    width: 345,
-    borderBottomWidth: 1,
-    borderColor: "#d7d7d7",
-    borderStyle: "solid",
-    alignItems: "center",
-    flexDirection: "row"
-  },
   frameParent: {
-    width: "100%",
+    width: windowWidth,
     alignItems: "center",
   },
   exitTextStyle: {
@@ -215,6 +270,14 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   exitBtnWrapper: {
+    paddingVertical: 12,
+    paddingHorizontal: 0,
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderColor: "#d7d7d7",
+    borderStyle: "solid",
+    alignItems: "center",
+    flexDirection: "row",
     borderRadius: 5,
     borderWidth: 1,
     width: 100,

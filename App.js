@@ -55,8 +55,7 @@ class HomeScreen extends React.Component {
         >
 
           <Tab.Screen name="Home" component={Mainhome} />
-
-          <Tab.Screen name="Profile" component={Profile} />
+          <Tab.Screen name="Profile" component={Profile} /> 
         </Tab.Navigator>
 
       </NavigationContainer>
